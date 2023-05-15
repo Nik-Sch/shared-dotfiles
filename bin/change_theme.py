@@ -57,7 +57,7 @@ def go_dark():
     set_color("prefer-dark")
     set_vscode("One Dark Pro")
     set_bg(f"{Path.home()}/dark.jpg")
-    set_kitty("Atom")
+    set_kitty("One Dark")
 
 
 def go_light():
