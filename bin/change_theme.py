@@ -11,10 +11,10 @@ def set_bg(name: str):
             "feh",
             "--no-fehbg",
             "--bg-fill",
-            "--no-xinerama",
             name,
         ]
     )
+
 
 def set_theme(name: str):
     subprocess.call(
@@ -56,7 +56,7 @@ def set_vscode(name: str):
 def go_dark():
     set_color("prefer-dark")
     set_vscode("One Dark Pro")
-    set_bg(f"{Path.home()}/dark.jpg")
+    set_bg(f"{args.background_path}/dark.jpg")
     set_kitty("One Dark")
 
 
@@ -94,8 +94,8 @@ parser = argparse.ArgumentParser(
     prog="go mode",
     description="Sets/Toggles light dark mode",
 )
-parser.add_argument('-n', '--no-toggle', action='store_true')
-parser.add_argument('-b', '--background-path', default=Path.home())
+parser.add_argument("-n", "--no-toggle", action="store_true")
+parser.add_argument("-b", "--background-path", default=Path.home())
 args = parser.parse_args()
 if not args.no_toggle:
     toggle()
