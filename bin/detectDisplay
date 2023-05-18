@@ -1,0 +1,59 @@
+#!/bin/env python3
+import subprocess as sp
+import re
+from pathlib import Path
+from typing import List, Tuple
+
+xrandrOut = sp.check_output(['xrandr']).decode('utf-8')
+connectedDisplays: List[List[str]] = re.findall(r'^(\S+)\s+connected.*$\s*(\d+)x(\d+)', xrandrOut, re.M)
+disconnectedDisplays: List[str] = re.findall(r'^(\S+)\s+disconnected', xrandrOut, re.M)
+if connectedDisplays == None:
+  print('Failed to parse xrandr output')
+  exit(1)
+print('detected displays:', ', '.join(f'{m[0]} ({m[1]}x{m[2]})' for m in connectedDisplays))
+print (f'disconnected displays: {", ".join(disconnectedDisplays)}')
+
+integrated = next(filter(lambda d: 'eDP' in d[0], connectedDisplays), None)
+  
+try:
+  with open ('/proc/acpi/button/lid/LID/state') as lid_file:
+    content = '\n'.join(lid_file.readlines())
+    if 'closed' in content:
+      print('Detected closed lid, disabling eDP')
+      connectedDisplays = list(filter(lambda d: 'eDP' not in d[0], connectedDisplays))
+except FileNotFoundError:
+  print('Cannot determine lid status')
+
+existingDesktops = sorted(sp.check_output(['bspc', 'query', '-D', '--names']).decode('utf-8').splitlines())
+print('existing desktops:', existingDesktops)
+
+
+print(f'Setting {len(connectedDisplays)} monitors')
+xrandrCall = ['xrandr']
+for d in disconnectedDisplays:
+  xrandrCall.extend(['--output', d, '--off'])
+xPos = 0
+for d in connectedDisplays:
+  xrandrCall.extend(['--output', d[0], '--mode',  f'{d[1]}x{d[2]}', '--primary', '--pos', f'{xPos}x0', '--rotate', 'normal',])
+  xPos += int(d[1])
+  # add temp desktop because each screen always needs one
+  sp.call(['bspc', 'monitor', d[0], '-a', 'Desktop'])
+sp.call(xrandrCall)
+
+for desktop in existingDesktops[:5]:
+  sp.call(['bspc', 'desktop', desktop, '-m', connectedDisplays[0][0]])
+for desktop in existingDesktops[4:]:
+  sp.call(['bspc', 'desktop', desktop, '-m', connectedDisplays[1][0]])
+for d in disconnectedDisplays:
+  try:
+    sp.call(['bspc', 'monitor', d, '-r'], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+  finally:
+    pass
+while 'Desktop' in sp.check_output(['bspc', 'query', '-D', '--names']).decode('utf-8'):
+  sp.call(['bspc', 'desktop',  'Desktop', '-r'])
+
+sp.call(['feh',
+  '--no-fehbg',
+  '--bg-fill',
+  f'{Path.home()}/dark.jpg'])
+
