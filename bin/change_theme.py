@@ -4,6 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
+from python_helper import get_gsettings_color_scheme
 
 def set_bg(name: str):
     subprocess.call(
@@ -11,10 +12,10 @@ def set_bg(name: str):
             "feh",
             "--no-fehbg",
             "--bg-fill",
-            "--no-xinerama",
             name,
         ]
     )
+
 
 def set_theme(name: str):
     subprocess.call(
@@ -56,7 +57,7 @@ def set_vscode(name: str):
 def go_dark():
     set_color("prefer-dark")
     set_vscode("One Dark Pro")
-    set_bg(f"{Path.home()}/dark.jpg")
+    set_bg(f"{args.background_path}/dark.jpg")
     set_kitty("One Dark")
 
 
@@ -68,38 +69,26 @@ def go_light():
 
 
 def toggle():
-    global MODE
-    if MODE == "dark":
-        MODE = "light"
+    global COLOR_SCHEME
+    if COLOR_SCHEME == "dark":
+        COLOR_SCHEME = "light"
     else:
-        MODE = "dark"
+        COLOR_SCHEME = "dark"
 
 
-MODE = "dark"
+COLOR_SCHEME = get_gsettings_color_scheme()
 
-try:
-    text = subprocess.check_output(
-        ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
-        encoding="utf8",
-    )
-
-    if "prefer-light" in text:
-        MODE = "light"
-except Exception as e:
-    print(e)
-    print("Error during settings read -> default dark")
-
-print(f"Detected {MODE} mode")
+print(f"Detected {COLOR_SCHEME} scheme")
 parser = argparse.ArgumentParser(
     prog="go mode",
     description="Sets/Toggles light dark mode",
 )
-parser.add_argument('-n', '--no-toggle', action='store_true')
-parser.add_argument('-b', '--background-path', default=Path.home())
+parser.add_argument("-n", "--no-toggle", action="store_true")
+parser.add_argument("-b", "--background-path", default=Path.home())
 args = parser.parse_args()
 if not args.no_toggle:
     toggle()
-if MODE == "dark":
+if COLOR_SCHEME == "dark":
     go_dark()
 else:
     go_light()
