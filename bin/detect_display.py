@@ -60,7 +60,7 @@ try:
         content = "\n".join(lid_file.readlines())
         if "closed" in content:
             print("Detected closed lid, disabling eDP")
-            disconnected.append(next(filter(lambda d: "eDP" in d.name, connected))[0]) # type: ignore
+            disconnected.append(next(filter(lambda d: "eDP" in d.name, connected)))
             connected_displays = list(
                 filter(lambda d: "eDP" not in d.name, connected)
             )
