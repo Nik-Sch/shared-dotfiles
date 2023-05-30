@@ -61,12 +61,11 @@ try:
         if "closed" in content:
             print("Detected closed lid, disabling eDP")
             disconnected.append(next(filter(lambda d: "eDP" in d.name, connected)))
-            connected_displays = list(
+            connected = list(
                 filter(lambda d: "eDP" not in d.name, connected)
             )
 except FileNotFoundError:
     print("Cannot determine lid status")
-
 existing_desktops = sorted(
     sp.check_output(["bspc", "query", "-D", "--names"]).decode("utf-8").splitlines()
 )
@@ -93,7 +92,7 @@ for d in connected:
     x_pos += int(d.width)
     # add temp desktop because each screen always needs one
     sp.call(["bspc", "monitor", d.name, "-a", "Desktop"])
-print(xrandr_call)
+# print(xrandr_call)
 sp.call(xrandr_call)
 
 desktop_per_display = int(len(existing_desktops) / len(connected))
