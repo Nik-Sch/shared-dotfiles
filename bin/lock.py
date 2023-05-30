@@ -5,7 +5,6 @@ import argparse
 import re
 import subprocess
 from pathlib import Path
-from datetime import datetime
 
 from python_helper import flatten, get_gsettings_color_scheme
 
@@ -87,6 +86,7 @@ params = {
     "--modif-color": "d23c3dff",
     "--noinput-text": "",
     "--keylayout": "0",
+    "--screen": "$display_on",
 }
 
 subprocess.call(
@@ -94,6 +94,7 @@ subprocess.call(
         "i3lock",
         *flatten([[key, value] for key, value in params.items()]),
         "-f",
+        "-L",
         "-n",
         "--line-uses-inside",
         "--clock",
