@@ -1,11 +1,13 @@
 #!/bin/env python3
 import argparse
+from dataclasses import dataclass
+import json
 import subprocess as sp
 import re
 from pathlib import Path
-from typing import List
-
+from typing import List, Tuple
 from python_helper import get_gsettings_color_scheme
+import jc
 
 parser = argparse.ArgumentParser(
     prog="detect_display",
@@ -14,19 +16,43 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-b", "--background-path", default=Path.home())
 args = parser.parse_args()
 
-xrandr_out = sp.check_output(["xrandr"]).decode("utf-8")
-connected_displays: List[List[str]] = re.findall(
-    r"^(\S+)\s+connected.*$\s*(\d+)x(\d+)", xrandr_out, re.M
-)
-disconnected_displays: List[str] = re.findall(r"^(\S+)\s+disconnected", xrandr_out, re.M)
-if connected_displays == None:
-    print("Failed to parse xrandr output")
-    exit(1)
-print(
-    "detected displays:",
-    ", ".join(f"{m[0]} ({m[1]}x{m[2]})" for m in connected_displays),
-)
-print(f'disconnected displays: {", ".join(disconnected_displays)}')
+
+# be careful: has side effects
+def get_highest_resolution(associated_modes: List[dict]):
+    associated_modes.sort(key=lambda x: x["resolution_width"] * x["resolution_height"])
+    return associated_modes[-1]
+
+
+@dataclass
+class Display:
+    name: str
+    width: int = -1
+    height: int = -1
+
+    def __init__(self, display: dict) -> None:
+        self.name = display["device_name"]
+        if len(display["associated_modes"]) > 0:
+            resolution = get_highest_resolution(display["associated_modes"])
+            self.width = resolution["resolution_width"]
+            self.height = resolution["resolution_height"]
+
+
+def get_displays() -> Tuple[List[Display], List[Display]]:
+    xrandr_out = sp.check_output(["xrandr"]).decode("utf-8")
+    result = jc.parse("xrandr", xrandr_out)
+    displays = [result["screens"][0]["associated_device"]] + result["unassociated_devices"]  # type: ignore
+    connected = [x for x in displays if x["is_connected"]]
+    disconnected = [x for x in displays if not x["is_connected"]]
+    return list(map(lambda display: Display(display), connected)), list(
+        map(lambda display: Display(display), disconnected)
+    )
+
+
+connected, disconnected = get_displays()
+
+
+print("detected displays:", connected)
+print("disconnected displays:", ", ".join(display.name for display in disconnected))
 
 
 try:
@@ -34,11 +60,9 @@ try:
         content = "\n".join(lid_file.readlines())
         if "closed" in content:
             print("Detected closed lid, disabling eDP")
-            disconnected_displays.append(
-                next(filter(lambda d: "eDP" in d[0], connected_displays), [""])[0]
-            )
+            disconnected.append(next(filter(lambda d: "eDP" in d.name, connected))[0]) # type: ignore
             connected_displays = list(
-                filter(lambda d: "eDP" not in d[0], connected_displays)
+                filter(lambda d: "eDP" not in d.name, connected)
             )
 except FileNotFoundError:
     print("Cannot determine lid status")
@@ -47,18 +71,18 @@ existing_desktops = sorted(
     sp.check_output(["bspc", "query", "-D", "--names"]).decode("utf-8").splitlines()
 )
 
-print(f"Setting {len(connected_displays)} monitors")
+print(f"Setting {len(connected)} monitors")
 xrandr_call = ["xrandr"]
-for d in disconnected_displays:
-    xrandr_call.extend(["--output", d, "--off"])
+for d in disconnected:
+    xrandr_call.extend(["--output", d.name, "--off"])
 x_pos = 0
-for d in connected_displays:
+for d in connected:
     xrandr_call.extend(
         [
             "--output",
-            d[0],
+            d.name,
             "--mode",
-            f"{d[1]}x{d[2]}",
+            f"{d.width}x{d.height}",
             "--primary",
             "--pos",
             f"{x_pos}x0",
@@ -66,13 +90,13 @@ for d in connected_displays:
             "normal",
         ]
     )
-    x_pos += int(d[1])
+    x_pos += int(d.width)
     # add temp desktop because each screen always needs one
-    sp.call(["bspc", "monitor", d[0], "-a", "Desktop"])
+    sp.call(["bspc", "monitor", d.name, "-a", "Desktop"])
 print(xrandr_call)
 sp.call(xrandr_call)
 
-desktop_per_display = int(len(existing_desktops) / len(connected_displays))
+desktop_per_display = int(len(existing_desktops) / len(connected))
 n = 0
 for i, desktop in enumerate(existing_desktops):
     sp.call(
@@ -81,14 +105,14 @@ for i, desktop in enumerate(existing_desktops):
             "desktop",
             desktop,
             "-m",
-            connected_displays[
-                min(int(i / desktop_per_display), len(connected_displays) - 1)
-            ][0],
+            connected[
+                min(int(i / desktop_per_display), len(connected) - 1)
+            ].name,
         ]
     )
-for d in disconnected_displays:
+for d in disconnected:
     try:
-        sp.call(["bspc", "monitor", d, "-r"], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+        sp.call(["bspc", "monitor", d.name, "-r"], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
     finally:
         pass
 while "Desktop" in sp.check_output(["bspc", "query", "-D", "--names"]).decode("utf-8"):
