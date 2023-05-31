@@ -15,8 +15,3 @@ def get_gsettings_color_scheme() -> Literal["light", "dark"]:
         print(e)
         print("Error during settings read -> default dark")
     return "dark"
-
-
-T = TypeVar('T')
-def flatten(l: List[List[T]]) -> list[T]:
-    return [item for sublist in l for item in sublist]

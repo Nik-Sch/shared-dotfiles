@@ -2,6 +2,7 @@
 
 # requires i3lock-color
 import argparse
+import itertools
 import re
 import subprocess
 from pathlib import Path
@@ -92,7 +93,7 @@ params = {
 subprocess.call(
     [
         "i3lock",
-        *flatten([[key, value] for key, value in params.items()]),
+        *itertools.chain(*[[key, value] for key, value in params.items()]),
         "-f",
         "-L",
         "-n",
@@ -105,7 +106,6 @@ subprocess.call(
         "--pass-power-keys",
     ]
 )
-
 # restore dpms timeout
 if dpms_timeout is not None:
     subprocess.call(["xset", "dpms", dpms_timeout[1]])
