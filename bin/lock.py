@@ -7,7 +7,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from python_helper import flatten, get_gsettings_color_scheme
+from python_helper import get_gsettings_color_scheme
 
 parser = argparse.ArgumentParser(
     prog="lock",
