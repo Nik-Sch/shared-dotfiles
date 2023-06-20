@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser(
     description="detects displays and enables them accordingly",
 )
 parser.add_argument("-b", "--background-path", default=Path.home())
+parser.add_argument("-d", "--desktops", nargs="+")
 args = parser.parse_args()
 
 
@@ -48,10 +49,10 @@ def get_displays() -> Tuple[List[Display], List[Display]]:
     )
 
 
-connected, disconnected = get_displays()
+connected_displays, disconnected = get_displays()
 
 
-print("detected displays:", connected)
+print("detected displays:", connected_displays)
 print("disconnected displays:", ", ".join(display.name for display in disconnected))
 
 
@@ -60,22 +61,21 @@ try:
         content = "\n".join(lid_file.readlines())
         if "closed" in content:
             print("Detected closed lid, disabling eDP")
-            disconnected.append(next(filter(lambda d: "eDP" in d.name, connected)))
-            connected = list(
-                filter(lambda d: "eDP" not in d.name, connected)
-            )
+            disconnected.append(next(filter(lambda d: "eDP" in d.name, connected_displays)))
+            connected_displays = list(filter(lambda d: "eDP" not in d.name, connected_displays))
 except FileNotFoundError:
     print("Cannot determine lid status")
+
 existing_desktops = sorted(
     sp.check_output(["bspc", "query", "-D", "--names"]).decode("utf-8").splitlines()
 )
 
-print(f"Setting {len(connected)} monitors")
+print(f"Setting {len(connected_displays)} monitors")
 xrandr_call = ["xrandr"]
 for d in disconnected:
     xrandr_call.extend(["--output", d.name, "--off"])
 x_pos = 0
-for d in connected:
+for d in connected_displays:
     xrandr_call.extend(
         [
             "--output",
@@ -94,21 +94,23 @@ for d in connected:
     sp.call(["bspc", "monitor", d.name, "-a", "Desktop"])
 # print(xrandr_call)
 sp.call(xrandr_call)
-
-desktop_per_display = int(len(existing_desktops) / len(connected))
+target_desktops = existing_desktops if args.desktops is None else args.desktops
+desktop_per_display = len(target_desktops) // len(connected_displays)
 n = 0
-for i, desktop in enumerate(existing_desktops):
-    sp.call(
-        [
-            "bspc",
-            "desktop",
-            desktop,
-            "-m",
-            connected[
-                min(int(i / desktop_per_display), len(connected) - 1)
-            ].name,
-        ]
-    )
+for i, desktop in enumerate(target_desktops):
+    monitor_name = connected_displays[min(i // desktop_per_display, len(connected_displays) - 1)].name
+    if desktop in existing_desktops:
+        sp.call(
+            [
+                "bspc",
+                "desktop",
+                desktop,
+                "-m",
+                monitor_name,
+            ]
+        )
+    else:
+        sp.run(["bspc", "monitor", monitor_name, "-a", desktop], check=True)
 for d in disconnected:
     try:
         sp.call(["bspc", "monitor", d.name, "-r"], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
