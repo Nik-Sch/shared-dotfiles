@@ -1,5 +1,0 @@
-jc==1.23.2
-Pygments==2.15.1
-ruamel.yaml==0.17.29
-ruamel.yaml.clib==0.2.7
-xmltodict==0.13.0
