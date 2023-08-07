@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "shared-dotfiles"
+version = "0.1.0"
+description = ""
+authors = ["Nik-Sch <mail@niklas-schelten.de>"]
+readme = "README.md"
+packages = [{include = "shared_dotfiles"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+jc = "^1.23.4"
+
+[tool.poetry.scripts]
+lock = "shared_dotfiles.lock:run"
+detect_display = "shared_dotfiles.detect_display:run"
+change_theme = "shared_dotfiles.change_theme:run"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

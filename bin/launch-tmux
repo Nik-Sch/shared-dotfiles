@@ -1,7 +1,0 @@
-#!/bin/bash
-i=0
-prefix=term-
-while tmux ls | egrep -q "^$prefix$i:"; do
-  ((i=i+1))
-done
-kitty tmux new-session -s $prefix$i
