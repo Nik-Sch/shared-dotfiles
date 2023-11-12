@@ -7,6 +7,8 @@ import re
 import subprocess
 from pathlib import Path
 
+import argcomplete
+
 from .python_helper import get_gsettings_color_scheme
 
 def run():
@@ -15,6 +17,7 @@ def run():
         description="locks the screen",
     )
     parser.add_argument("-b", "--background-path", default=Path.home())
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
 
     color_mode = get_gsettings_color_scheme()
