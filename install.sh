@@ -2,4 +2,4 @@
 rm -rf dist
 poetry install
 poetry build
-pipx install ./dist/shared_dotfiles-*.tar.gz
+pipx install -f ./dist/shared_dotfiles-*.tar.gz

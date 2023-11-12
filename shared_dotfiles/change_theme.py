@@ -4,7 +4,10 @@ import json
 import subprocess
 from pathlib import Path
 
+import argcomplete
+
 from .python_helper import get_gsettings_color_scheme
+
 
 def set_bg(name: str):
     subprocess.call(
@@ -78,6 +81,7 @@ def toggle():
 
 COLOR_SCHEME = get_gsettings_color_scheme()
 
+
 def run():
     print(f"Detected {COLOR_SCHEME} scheme")
     parser = argparse.ArgumentParser(
@@ -86,6 +90,7 @@ def run():
     )
     parser.add_argument("-n", "--no-toggle", action="store_true")
     parser.add_argument("-b", "--background-path", default=Path.home())
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
     if not args.no_toggle:
         toggle()

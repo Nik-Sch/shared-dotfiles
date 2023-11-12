@@ -6,8 +6,11 @@ import subprocess as sp
 import re
 from pathlib import Path
 from typing import List, Tuple
+
+import argcomplete
 from .python_helper import get_gsettings_color_scheme
 import jc
+
 
 def run():
     parser = argparse.ArgumentParser(
@@ -16,14 +19,15 @@ def run():
     )
     parser.add_argument("-b", "--background-path", default=Path.home())
     parser.add_argument("-d", "--desktops", nargs="+")
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
-
 
     # be careful: has side effects
     def get_highest_resolution(associated_modes: List[dict]):
-        associated_modes.sort(key=lambda x: x["resolution_width"] * x["resolution_height"])
+        associated_modes.sort(
+            key=lambda x: x["resolution_width"] * x["resolution_height"]
+        )
         return associated_modes[-1]
-
 
     @dataclass
     class Display:
@@ -38,7 +42,6 @@ def run():
                 self.width = resolution["resolution_width"]
                 self.height = resolution["resolution_height"]
 
-
     def get_displays() -> Tuple[List[Display], List[Display]]:
         xrandr_out = sp.check_output(["xrandr"]).decode("utf-8")
         result = jc.parse("xrandr", xrandr_out)
@@ -49,21 +52,22 @@ def run():
             map(lambda display: Display(display), disconnected)
         )
 
-
     connected_displays, disconnected = get_displays()
-
 
     print("detected displays:", connected_displays)
     print("disconnected displays:", ", ".join(display.name for display in disconnected))
-
 
     try:
         with open("/proc/acpi/button/lid/LID0/state") as lid_file:
             content = "\n".join(lid_file.readlines())
             if "closed" in content:
                 print("Detected closed lid, disabling eDP")
-                disconnected.append(next(filter(lambda d: "eDP" in d.name, connected_displays)))
-                connected_displays = list(filter(lambda d: "eDP" not in d.name, connected_displays))
+                disconnected.append(
+                    next(filter(lambda d: "eDP" in d.name, connected_displays))
+                )
+                connected_displays = list(
+                    filter(lambda d: "eDP" not in d.name, connected_displays)
+                )
     except FileNotFoundError:
         print("Cannot determine lid status")
 
@@ -99,7 +103,9 @@ def run():
     desktop_per_display = len(target_desktops) // len(connected_displays)
     n = 0
     for i, desktop in enumerate(target_desktops):
-        monitor_name = connected_displays[min(i // desktop_per_display, len(connected_displays) - 1)].name
+        monitor_name = connected_displays[
+            min(i // desktop_per_display, len(connected_displays) - 1)
+        ].name
         if desktop in existing_desktops:
             sp.call(
                 [
@@ -114,11 +120,17 @@ def run():
             sp.run(["bspc", "monitor", monitor_name, "-a", desktop], check=True)
     for d in disconnected:
         try:
-            sp.call(["bspc", "monitor", d.name, "-r"], stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+            sp.call(
+                ["bspc", "monitor", d.name, "-r"], stdout=sp.DEVNULL, stderr=sp.DEVNULL
+            )
         finally:
             pass
-    while "Desktop" in sp.check_output(["bspc", "query", "-D", "--names"]).decode("utf-8"):
+    while "Desktop" in sp.check_output(["bspc", "query", "-D", "--names"]).decode(
+        "utf-8"
+    ):
         sp.call(["bspc", "desktop", "Desktop", "-r"])
 
     color_mode = get_gsettings_color_scheme()
-    sp.call(["feh", "--no-fehbg", "--bg-fill", f"{args.background_path}/{color_mode}.jpg"])
+    sp.call(
+        ["feh", "--no-fehbg", "--bg-fill", f"{args.background_path}/{color_mode}.jpg"]
+    )
