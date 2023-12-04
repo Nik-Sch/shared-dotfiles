@@ -33,8 +33,8 @@ def run():
 
         def __init__(self, display: dict) -> None:
             self.name = display["device_name"]
-            if len(display["associated_modes"]) > 0:
-                resolution = get_highest_resolution(display["associated_modes"])
+            if len(display["modes"]) > 0:
+                resolution = get_highest_resolution(display["modes"])
                 self.width = resolution["resolution_width"]
                 self.height = resolution["resolution_height"]
 
@@ -42,7 +42,7 @@ def run():
     def get_displays() -> Tuple[List[Display], List[Display]]:
         xrandr_out = sp.check_output(["xrandr"]).decode("utf-8")
         result = jc.parse("xrandr", xrandr_out)
-        displays = [result["screens"][0]["associated_device"]] + result["unassociated_devices"]  # type: ignore
+        displays = result["screens"][0]["devices"]  # type: ignore
         connected = [x for x in displays if x["is_connected"]]
         disconnected = [x for x in displays if not x["is_connected"]]
         return list(map(lambda display: Display(display), connected)), list(
