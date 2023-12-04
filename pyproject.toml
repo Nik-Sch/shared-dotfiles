@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shared-dotfiles"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Nik-Sch <mail@niklas-schelten.de>"]
 readme = "README.md"
