@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shared-dotfiles"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Nik-Sch <mail@niklas-schelten.de>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ packages = [{include = "shared_dotfiles"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-jc = "^1.23.6"
+jc = "1.23.6"
 
 [tool.poetry.scripts]
 lock = "shared_dotfiles.lock:run"
