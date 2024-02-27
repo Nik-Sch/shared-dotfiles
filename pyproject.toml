@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shared-dotfiles"
-version = "0.1.2"
+version = "0.2.0"
 description = ""
 authors = ["Nik-Sch <mail@niklas-schelten.de>"]
 readme = "README.md"
@@ -14,6 +14,7 @@ jc = "1.23.6"
 lock = "shared_dotfiles.lock:run"
 detect_display = "shared_dotfiles.detect_display:run"
 change_theme = "shared_dotfiles.change_theme:run"
+toggle_calc = "shared_dotfiles.toggle_calc:run"
 
 
 [build-system]
