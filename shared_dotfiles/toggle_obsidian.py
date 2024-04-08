@@ -7,7 +7,7 @@ def check_is_running() -> bool:
         len(
             subprocess.run(
                 ["ps", "ux"],
-                check=True,  # pidof returns error when no pid found
+                check=True,
                 capture_output=True,
                 text=True,
             )
