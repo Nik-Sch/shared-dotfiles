@@ -15,6 +15,7 @@ lock = "shared_dotfiles.lock:run"
 detect_display = "shared_dotfiles.detect_display:run"
 change_theme = "shared_dotfiles.change_theme:run"
 toggle_calc = "shared_dotfiles.toggle_calc:run"
+toggle_obsidian = "shared_dotfiles.toggle_obsidian:run"
 
 
 [build-system]
