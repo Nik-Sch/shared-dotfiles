@@ -34,7 +34,7 @@ def toggle_app(
         [
             int(id)
             for id in subprocess.run(
-                ["xdotool", "search", "--class", class_name],
+                ["xdotool", "search", "--sync", "--class", class_name],
                 check=True,
                 capture_output=True,
                 text=True,
