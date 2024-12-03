@@ -2,22 +2,29 @@
 name = "shared-dotfiles"
 version = "0.2.0"
 description = ""
-authors = ["Nik-Sch <mail@niklas-schelten.de>"]
+authors = [
+  "Nik-Sch <mail@niklas-schelten.de>",
+]
 readme = "README.md"
-packages = [{include = "shared_dotfiles"}]
+packages = [
+  { include = "shared_dotfiles" },
+]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-jc = "1.23.6"
+python = "^3.12"
+jc     = "1.23.6"
 
 [tool.poetry.scripts]
-lock = "shared_dotfiles.lock:run"
-detect_display = "shared_dotfiles.detect_display:run"
-change_theme = "shared_dotfiles.change_theme:run"
-toggle_calc = "shared_dotfiles.toggle_calc:run"
+lock            = "shared_dotfiles.lock:run"
+detect_display  = "shared_dotfiles.detect_display:run"
+change_theme    = "shared_dotfiles.change_theme:run"
+toggle_calc     = "shared_dotfiles.toggle_calc:run"
 toggle_obsidian = "shared_dotfiles.toggle_obsidian:run"
+set_desktop     = "shared_dotfiles.set_desktops:run"
 
 
 [build-system]
-requires = ["poetry-core"]
+requires = [
+  "poetry-core",
+]
 build-backend = "poetry.core.masonry.api"
