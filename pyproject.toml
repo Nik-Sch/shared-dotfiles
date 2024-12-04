@@ -23,8 +23,17 @@ toggle_obsidian = "shared_dotfiles.toggle_obsidian:run"
 set_desktop     = "shared_dotfiles.set_desktops:run"
 
 
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+pyright = "^1.1.389"
+isort = "^5.13.2"
+
 [build-system]
 requires = [
   "poetry-core",
 ]
 build-backend = "poetry.core.masonry.api"
+[tool.pyright]
+typeCheckingMode = "strict"
+[tool.isort]
+profile = "black"

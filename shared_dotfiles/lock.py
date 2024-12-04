@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .python_helper import get_gsettings_color_scheme
 
+
 def run():
     parser = argparse.ArgumentParser(
         prog="lock",

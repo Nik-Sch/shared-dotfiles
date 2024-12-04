@@ -1,14 +1,14 @@
 #!/bin/env python3
 import argparse
-from dataclasses import dataclass
-import json
 import subprocess as sp
-import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
-from shared_dotfiles.python_helper import get_gsettings_color_scheme
+
 import jc
 from jc.jc_types import JSONDictType
+
+from shared_dotfiles.python_helper import get_gsettings_color_scheme
 
 
 def get_highest_resolution(associated_modes: list[JSONDictType]):
@@ -33,8 +33,8 @@ class Display:
 
 def get_displays() -> tuple[list[Display], list[Display]]:
     xrandr_out = sp.check_output(["xrandr"]).decode("utf-8")
-    result = cast(JSONDictType, jc.parse("xrandr", xrandr_out))
-    displays = result["screens"][0]["devices"]  # type: ignore
+    result = cast(JSONDictType, jc.parse("xrandr", xrandr_out))   # type: ignore
+    displays = result["screens"][0]["devices"]
     connected = [x for x in displays if x["is_connected"]]
     disconnected = [x for x in displays if not x["is_connected"]]
     return list(map(lambda display: Display(display), connected)), list(

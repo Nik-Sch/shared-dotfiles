@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .python_helper import get_gsettings_color_scheme
 
+
 def set_bg(name: str):
     subprocess.call(
         [
@@ -69,17 +70,18 @@ def go_light(background_path: str):
 
 
 def toggle():
-    global COLOR_SCHEME
-    if COLOR_SCHEME == "dark":
-        COLOR_SCHEME = "light"
+    global color_scheme
+    if color_scheme == "dark":
+        color_scheme = "light"
     else:
-        COLOR_SCHEME = "dark"
+        color_scheme = "dark"
 
 
-COLOR_SCHEME = get_gsettings_color_scheme()
+color_scheme = get_gsettings_color_scheme()
+
 
 def run():
-    print(f"Detected {COLOR_SCHEME} scheme")
+    print(f"Detected {color_scheme} scheme")
     parser = argparse.ArgumentParser(
         prog="go mode",
         description="Sets/Toggles light dark mode",
@@ -89,7 +91,7 @@ def run():
     args = parser.parse_args()
     if not args.no_toggle:
         toggle()
-    if COLOR_SCHEME == "dark":
+    if color_scheme == "dark":
         go_dark(args.background_path)
     else:
         go_light(args.background_path)
