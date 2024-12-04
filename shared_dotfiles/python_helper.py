@@ -1,5 +1,5 @@
 import subprocess
-from typing import List, Literal, TypeVar
+from typing import Literal
 
 
 def get_gsettings_color_scheme() -> Literal["light", "dark"]:

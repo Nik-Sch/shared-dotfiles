@@ -1,4 +1,5 @@
 import subprocess
+
 from shared_dotfiles.toggle_app import toggle_app
 
 OBSIDIAN_BINARY = "obsidian"
