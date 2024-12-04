@@ -8,8 +8,8 @@ from shared_dotfiles.detect_display import get_displays
 
 def run():
     parser = argparse.ArgumentParser(
-        prog="detect_display",
-        description="detects displays and enables them accordingly",
+        prog=f"set_desktops",
+        description="distributes desktops across monitors",
     )
     parser.add_argument("desktops", nargs="+")
     args = parser.parse_args()
