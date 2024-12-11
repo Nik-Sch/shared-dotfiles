@@ -1,5 +1,6 @@
 import argparse
 from itertools import batched
+from math import ceil
 from subprocess import call, check_call, check_output
 from typing import cast
 
@@ -19,7 +20,7 @@ def run():
         check_output(["bspc", "query", "-D", "--names"]).decode("utf-8").splitlines()
     )
     for desktops, display in zip(
-        batched(desktops, len(desktops) // len(displays)), displays, strict=True
+        batched(desktops, ceil(len(desktops) / len(displays))), displays, strict=True
     ):
         monitor_name = display.name
         for desktop in desktops:
@@ -35,3 +36,8 @@ def run():
                 )
             else:
                 check_call(["bspc", "monitor", monitor_name, "-a", desktop])
+        # Remove extraneous desktops
+        desktopsExist = check_output(["bspc", "query", "-D", "--names", "-m", display.name]).decode("utf-8").splitlines()
+        for desktopExist in desktopsExist:
+            if not desktopExist in desktops:
+                check_call(['bspc', 'desktop', desktopExist, '-r'])
