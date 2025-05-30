@@ -1,5 +1,7 @@
 import argparse
 from itertools import batched
+import json
+import logging
 from math import ceil
 from subprocess import call, check_call, check_output
 from typing import cast
@@ -37,7 +39,11 @@ def run():
             else:
                 check_call(["bspc", "monitor", monitor_name, "-a", desktop])
         # Remove extraneous desktops
-        desktopsExist = check_output(["bspc", "query", "-D", "--names", "-m", display.name]).decode("utf-8").splitlines()
-        for desktopExist in desktopsExist:
-            if not desktopExist in desktops:
-                check_call(['bspc', 'desktop', desktopExist, '-r'])
+        monitor_info = json.loads(
+            check_output(["bspc", "query", "-T", "-m", display.name])
+        )
+        for desktop in monitor_info["desktops"]:
+
+            if not desktop["name"] in desktops:
+                logging.warning(f"Closing '{desktop['name']}' {desktop['id']} for {display.name}")
+                check_call(["bspc", "desktop", str(desktop["id"]), "-r"])
