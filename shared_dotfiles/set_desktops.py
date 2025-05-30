@@ -1,7 +1,7 @@
 import argparse
-from itertools import batched
 import json
 import logging
+from itertools import batched
 from math import ceil
 from subprocess import call, check_call, check_output
 from typing import cast
