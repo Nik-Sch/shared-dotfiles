@@ -1,5 +1,8 @@
 import argparse
+import json
+import logging
 from itertools import batched
+from math import ceil
 from subprocess import call, check_call, check_output
 from typing import cast
 
@@ -19,7 +22,7 @@ def run():
         check_output(["bspc", "query", "-D", "--names"]).decode("utf-8").splitlines()
     )
     for desktops, display in zip(
-        batched(desktops, len(desktops) // len(displays)), displays, strict=True
+        batched(desktops, ceil(len(desktops) / len(displays))), displays, strict=True
     ):
         monitor_name = display.name
         for desktop in desktops:
@@ -35,3 +38,12 @@ def run():
                 )
             else:
                 check_call(["bspc", "monitor", monitor_name, "-a", desktop])
+        # Remove extraneous desktops
+        monitor_info = json.loads(
+            check_output(["bspc", "query", "-T", "-m", display.name])
+        )
+        for desktop in monitor_info["desktops"]:
+
+            if not desktop["name"] in desktops:
+                logging.warning(f"Closing '{desktop['name']}' {desktop['id']} for {display.name}")
+                check_call(["bspc", "desktop", str(desktop["id"]), "-r"])
