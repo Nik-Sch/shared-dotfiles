@@ -1,5 +1,4 @@
 #!/bin/bash
-rm -rf dist
-poetry install
-poetry build
-pipx install ./dist/shared_dotfiles-*.tar.gz --force
+set -e
+uv build
+uv tool install dist/shared_dotfiles-*.whl --force

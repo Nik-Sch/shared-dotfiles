@@ -1,40 +1,39 @@
-[tool.poetry]
+[project]
 name = "shared-dotfiles"
 version = "0.2.0"
 description = ""
-authors = [
-  "Nik-Sch <mail@niklas-schelten.de>",
-]
+authors = [{ name = "Nik-Sch", email = "mail@niklas-schelten.de" }]
+requires-python = ">=3.12.0"
 readme = "README.md"
-packages = [
-  { include = "shared_dotfiles" },
+dependencies = ["jc==1.23.6"]
+
+[project.scripts]
+lock = "shared_dotfiles.lock:run"
+detect_display = "shared_dotfiles.detect_display:run"
+change_theme = "shared_dotfiles.change_theme:run"
+toggle_calc = "shared_dotfiles.toggle_calc:run"
+toggle_obsidian = "shared_dotfiles.toggle_obsidian:run"
+set_desktop = "shared_dotfiles.set_desktops:run"
+
+[dependency-groups]
+dev = [
+    "black>=24.10.0,<25",
+    "pyright>=1.1.389,<2",
+    "isort>=5.13.2,<6",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-jc     = "1.23.6"
+[tool.hatch.build.targets.sdist]
+include = ["shared_dotfiles"]
 
-[tool.poetry.scripts]
-lock            = "shared_dotfiles.lock:run"
-detect_display  = "shared_dotfiles.detect_display:run"
-change_theme    = "shared_dotfiles.change_theme:run"
-toggle_calc     = "shared_dotfiles.toggle_calc:run"
-toggle_obsidian = "shared_dotfiles.toggle_obsidian:run"
-set_desktop     = "shared_dotfiles.set_desktops:run"
-
-
-[tool.poetry.group.dev.dependencies]
-black = "^24.10.0"
-pyright = "^1.1.389"
-isort = "^5.13.2"
-
+[tool.hatch.build.targets.wheel]
+include = ["shared_dotfiles"]
 
 [build-system]
-requires = [
-  "poetry-core",
-]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.pyright]
 typeCheckingMode = "strict"
+
 [tool.isort]
 profile = "black"

@@ -3,7 +3,6 @@ import json
 import logging
 from itertools import batched
 from math import ceil
-from math import ceil
 from subprocess import call, check_call, check_output
 from typing import cast
 
@@ -46,5 +45,7 @@ def run():
         for desktop in monitor_info["desktops"]:
 
             if not desktop["name"] in desktops:
-                logging.warning(f"Closing '{desktop['name']}' {desktop['id']} for {display.name}")
+                logging.warning(
+                    f"Closing '{desktop['name']}' {desktop['id']} for {display.name}"
+                )
                 check_call(["bspc", "desktop", str(desktop["id"]), "-r"])
