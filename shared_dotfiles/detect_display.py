@@ -33,7 +33,7 @@ class Display:
 
 def get_displays() -> tuple[list[Display], list[Display]]:
     xrandr_out = sp.check_output(["xrandr"]).decode("utf-8")
-    result = cast(JSONDictType, jc.parse("xrandr", xrandr_out))   # type: ignore
+    result = cast(JSONDictType, jc.parse("xrandr", xrandr_out))  # type: ignore
     displays = result["screens"][0]["devices"]
     connected = [x for x in displays if x["is_connected"]]
     disconnected = [x for x in displays if not x["is_connected"]]

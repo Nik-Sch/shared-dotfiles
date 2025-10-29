@@ -45,5 +45,7 @@ def run():
         for desktop in monitor_info["desktops"]:
 
             if not desktop["name"] in desktops:
-                logging.warning(f"Closing '{desktop['name']}' {desktop['id']} for {display.name}")
+                logging.warning(
+                    f"Closing '{desktop['name']}' {desktop['id']} for {display.name}"
+                )
                 check_call(["bspc", "desktop", str(desktop["id"]), "-r"])
