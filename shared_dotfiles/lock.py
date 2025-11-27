@@ -16,6 +16,7 @@ def run():
         description="locks the screen",
     )
     parser.add_argument("-b", "--background-path", default=Path.home())
+    parser.add_argument("--do-not-lock-keepass", action="store_true")
     args = parser.parse_args()
 
     color_mode = get_gsettings_color_scheme()
@@ -39,7 +40,10 @@ def run():
     if dpms_timeout is not None:
         subprocess.call(["xset", "dpms", "5"])
 
-    if subprocess.call(["pidof", "keepassxc"], stdout=subprocess.DEVNULL) == 0:
+    if (
+        subprocess.call(["pidof", "keepassxc"], stdout=subprocess.DEVNULL) == 0
+        and not args.do_not_lock_keepass
+    ):
         subprocess.call(["keepassxc", "--lock"])
 
     params = {
