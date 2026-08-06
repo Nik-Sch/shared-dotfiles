@@ -1,21 +1,39 @@
 #!/bin/env python3
 import argparse
-import json
+import re
 import subprocess
+import time
 from pathlib import Path
 
-from .python_helper import get_gsettings_color_scheme
+from .python_helper import get_gsettings_color_scheme, is_hyprland
+
+
+def _hyprpaper(*args: str) -> bool:
+    """Silent with rc 0 on success, "error: ..." with rc 1 on failure."""
+    result = subprocess.run(
+        ["hyprctl", "hyprpaper", *args], capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"hyprpaper {' '.join(args)}: {result.stdout.strip()}")
+        return False
+    return True
 
 
 def set_bg(name: str):
-    subprocess.call(
-        [
-            "feh",
-            "--no-fehbg",
-            "--bg-fill",
-            name,
-        ]
-    )
+    if not is_hyprland():
+        subprocess.call(["feh", "--no-fehbg", "--bg-fill", name])
+        return
+
+    if not Path(name).is_file():
+        print(f"No such wallpaper: {name}")
+        return
+    # empty monitor means every monitor; hyprpaper may still be coming up when
+    # this runs from the autostart, so give it a few seconds
+    for _ in range(20):
+        if _hyprpaper("wallpaper", f",{name},cover"):
+            return
+        time.sleep(0.25)
+    print("hyprpaper is not answering, wallpaper unchanged")
 
 
 def set_theme(name: str):
@@ -50,9 +68,19 @@ def set_kitty(name: str):
 
 def set_vscode(name: str):
     settings_path = Path.home() / ".config/Code/User/settings.json"
-    settings = json.loads(Path(settings_path).read_text(encoding="utf8"))
-    settings["workbench.colorTheme"] = name
-    settings_path.write_text(json.dumps(settings, indent=4))
+    try:
+        text = settings_path.read_text(encoding="utf8")
+    except FileNotFoundError:
+        print(f"No vscode settings at {settings_path}")
+        return
+    # settings.json is jsonc, so it is edited textually to keep the comments
+    text, replaced = re.subn(
+        r'("workbench\.colorTheme"\s*:\s*)"[^"]*"', rf'\1"{name}"', text, count=1
+    )
+    if replaced == 0:
+        print("No workbench.colorTheme in the vscode settings")
+        return
+    settings_path.write_text(text, encoding="utf8")
 
 
 def go_dark(background_path: str):
