@@ -1,9 +1,36 @@
 import subprocess
-from typing import Callable, Optional
+import time
+from collections.abc import Callable
+
+from python_helper import is_hyprland
 
 
-def toggle_app(
-    binary: str, class_name: str, is_running_func: Optional[Callable[[], bool]] = None
+def toggle_app_hyprland(binary: str, class_name: str):
+    # Show/hide via the app's dedicated special workspace (see its hl.window_rule).
+    pids = [
+        int(pid)
+        for pid in subprocess.run(
+            ["pidof", binary], check=False, capture_output=True, text=True
+        )
+        .stdout.strip()
+        .split()
+    ]
+    pids.sort()
+    if not pids:
+        print("Spawning new app")
+        subprocess.Popen([binary], start_new_session=True)
+        time.sleep(1)  # give it a moment to map into its special workspace
+    else:
+        for pid in pids[1:]:
+            subprocess.run(["kill", str(pid)], check=True)
+
+    subprocess.run(
+        ["hyprctl", "dispatch", f'hl.dsp.workspace.toggle_special("{class_name}")']
+    )
+
+
+def toggle_app_bspwm(
+    binary: str, class_name: str, is_running_func: Callable[[], bool] | None = None
 ):
 
     if is_running_func is not None:
@@ -50,3 +77,12 @@ def toggle_app(
     id = ids[0]
     subprocess.run(["bspc", "node", str(id), "-d", "focused"])
     subprocess.run(["bspc", "node", str(id), "--flag", "hidden", "-f"])
+
+
+def toggle_app(
+    binary: str, class_name: str, is_running_func: Callable[[], bool] | None = None
+):
+    if is_hyprland():
+        toggle_app_hyprland(binary, class_name)
+    else:
+        toggle_app_bspwm(binary, class_name, is_running_func)

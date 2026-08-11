@@ -4,10 +4,19 @@ import json
 import subprocess
 from pathlib import Path
 
-from .python_helper import get_gsettings_color_scheme
+from .python_helper import get_gsettings_color_scheme, is_hyprland
 
 
 def set_bg(name: str):
+    if is_hyprland():
+        subprocess.call(["pkill", "-x", "swaybg"])
+        subprocess.Popen(
+            ["swaybg", "-o", "*", "-i", name, "-m", "fill"],
+            start_new_session=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return
     subprocess.call(
         [
             "feh",

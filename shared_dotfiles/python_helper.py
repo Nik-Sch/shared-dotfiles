@@ -1,3 +1,4 @@
+import os
 import subprocess
 from typing import Literal
 
@@ -15,3 +16,9 @@ def get_gsettings_color_scheme() -> Literal["light", "dark"]:
         print(e)
         print("Error during settings read -> default dark")
     return "dark"
+
+
+def is_hyprland() -> bool:
+    return bool(os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")) and bool(
+        os.environ.get("WAYLAND_DISPLAY")
+    )

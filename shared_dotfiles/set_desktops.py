@@ -11,7 +11,7 @@ from shared_dotfiles.detect_display import get_displays
 
 def run():
     parser = argparse.ArgumentParser(
-        prog=f"set_desktops",
+        prog="set_desktops",
         description="distributes desktops across monitors",
     )
     parser.add_argument("desktops", nargs="+")
@@ -43,7 +43,6 @@ def run():
             check_output(["bspc", "query", "-T", "-m", display.name])
         )
         for desktop in monitor_info["desktops"]:
-
             if not desktop["name"] in desktops:
                 logging.warning(
                     f"Closing '{desktop['name']}' {desktop['id']} for {display.name}"
