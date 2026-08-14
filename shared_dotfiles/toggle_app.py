@@ -2,7 +2,7 @@ import subprocess
 import time
 from collections.abc import Callable
 
-from python_helper import is_hyprland
+from .python_helper import is_hyprland
 
 
 def toggle_app_hyprland(binary: str, class_name: str):
