@@ -66,6 +66,13 @@ def set_kitty(name: str):
     )
 
 
+def set_wezterm(name: str):
+    # wezterm.lua reads this file and reloads itself when it changes
+    path = Path.home() / ".local/state/wezterm-colorscheme"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"{name}\n", encoding="utf8")
+
+
 def set_vscode(name: str):
     settings_path = Path.home() / ".config/Code/User/settings.json"
     try:
@@ -88,6 +95,7 @@ def go_dark(background_path: str):
     set_vscode("One Dark Pro")
     set_bg(f"{background_path}/dark.jpg")
     set_kitty("One Dark")
+    set_wezterm("OneDark (base16)")
 
 
 def go_light(background_path: str):
@@ -95,6 +103,7 @@ def go_light(background_path: str):
     set_vscode("Atom One Light")
     set_bg(f"{background_path}/light.jpg")
     set_kitty("Atom One Light")
+    set_wezterm("One Light (base16)")
 
 
 def toggle():
