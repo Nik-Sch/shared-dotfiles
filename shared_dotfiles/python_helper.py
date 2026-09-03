@@ -1,5 +1,10 @@
+import os
 import subprocess
 from typing import Literal
+
+
+def is_hyprland() -> bool:
+    return bool(os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"))
 
 
 def get_gsettings_color_scheme() -> Literal["light", "dark"]:
